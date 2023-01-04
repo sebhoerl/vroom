@@ -710,6 +710,8 @@ inline Route format_route(const Input& input,
   assert(v.tw.contains(step_start));
   steps.back().arrival = scale_to_user_duration(step_start);
   UserDuration user_previous_end = steps.back().arrival;
+  steps.back().arrival_energy = utils::scale_to_user_energy(v.initial_energy);
+  steps.back().departure_energy = utils::scale_to_user_energy(v.initial_energy);
 
 #ifndef NDEBUG
   const auto front_step_arrival = step_start;
