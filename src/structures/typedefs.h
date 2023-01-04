@@ -35,6 +35,8 @@ using Cost = int64_t;
 using Distance = uint32_t;
 using UserDuration = uint32_t;
 using Duration = int64_t;
+using UserEnergy = uint32_t;
+using Energy = int64_t;
 using Coordinate = double;
 using Capacity = int64_t;
 using Skill = uint32_t;
@@ -60,6 +62,8 @@ const std::string DEFAULT_PROFILE = "car";
 
 // Our internal time measure is the hundredth of a second.
 constexpr Duration DURATION_FACTOR = 100;
+
+constexpr Energy ENERGY_FACTOR = 100; // TODO: What should be put here? /sh
 
 // Costs can be derived from travel times with a cost per hour for
 // vehicles. So we scale all costs in order to not use floating point
@@ -172,6 +176,10 @@ inline UserDuration scale_to_user_duration(Duration d) {
 
 inline UserCost scale_to_user_cost(Cost d) {
   return static_cast<UserCost>(d / (DURATION_FACTOR * COST_FACTOR));
+}
+
+inline Energy scale_from_user_energy(UserEnergy e) {
+  return ENERGY_FACTOR * static_cast<Energy>(e);
 }
 } // namespace utils
 

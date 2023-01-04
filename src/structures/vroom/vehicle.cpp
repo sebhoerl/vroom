@@ -28,6 +28,7 @@ Vehicle::Vehicle(Id id,
                  double speed_factor,
                  const size_t max_tasks,
                  const std::optional<UserDuration>& max_travel_time,
+                 const std::optional<UserEnergy>& initial_energy,
                  const std::vector<VehicleStep>& input_steps)
   : id(id),
     start(start),
@@ -44,6 +45,9 @@ Vehicle::Vehicle(Id id,
     max_travel_time(max_travel_time.has_value()
                       ? utils::scale_from_user_duration(max_travel_time.value())
                       : std::numeric_limits<Duration>::max()),
+    initial_energy(initial_energy.has_value()
+                      ? utils::scale_from_user_energy(initial_energy.value())
+                      : std::numeric_limits<Energy>::max()),
     has_break_max_load(
       std::any_of(breaks.cbegin(), breaks.cend(), [](const auto& b) {
         return b.max_load.has_value();

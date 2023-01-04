@@ -56,6 +56,7 @@ struct Vehicle {
   CostWrapper cost_wrapper;
   size_t max_tasks;
   const Duration max_travel_time;
+  const Energy initial_energy;
   const bool has_break_max_load;
   std::vector<VehicleStep> steps;
   std::unordered_map<Id, Index> break_id_to_rank;
@@ -75,6 +76,8 @@ struct Vehicle {
     const size_t max_tasks = std::numeric_limits<size_t>::max(),
     const std::optional<UserDuration>& max_travel_time =
       std::optional<UserDuration>(),
+    const std::optional<UserEnergy>& initial_energy =
+      std::optional<UserEnergy>(),
     const std::vector<VehicleStep>& input_steps = std::vector<VehicleStep>());
 
   bool has_start() const;

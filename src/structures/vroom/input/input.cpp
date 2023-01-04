@@ -398,6 +398,13 @@ void Input::set_costs_matrix(const std::string& profile, Matrix<UserCost>&& m) {
   _costs_matrices.insert_or_assign(profile, m);
 }
 
+void Input::set_energy_matrix(const std::string& profile, Matrix<UserCost>&& m) {
+  if (m.size() == 0) {
+    throw InputException("Empty energy matrix for " + profile + " profile.");
+  }
+  _energy_matrices.insert_or_assign(profile, m);
+}
+
 bool Input::is_used_several_times(const Location& location) const {
   return _locations_used_several_times.find(location) !=
          _locations_used_several_times.end();

@@ -140,6 +140,18 @@ get_max_travel_time(const rapidjson::Value& object) {
   return max_travel_time;
 }
 
+inline std::optional<UserEnergy>
+get_initial_energy(const rapidjson::Value& object) {
+  std::optional<UserEnergy> initial_energy;
+  if (object.HasMember("initial_energy")) {
+    if (!object["initial_energy"].IsUint()) {
+      throw InputException("Invalid initial_energy value.");
+    }
+    initial_energy = object["initial_energy"].GetUint();
+  }
+  return initial_energy;
+}
+
 inline void check_id(const rapidjson::Value& v, const std::string& type) {
   if (!v.IsObject()) {
     throw InputException("Invalid " + type + ".");
@@ -424,6 +436,7 @@ inline Vehicle get_vehicle(const rapidjson::Value& json_vehicle,
                  get_double(json_vehicle, "speed_factor"),
                  get_max_tasks(json_vehicle),
                  get_max_travel_time(json_vehicle),
+                 get_initial_energy(json_vehicle),
                  get_vehicle_steps(json_vehicle));
 }
 
@@ -610,6 +623,11 @@ void parse(Input& input, const std::string& input_str, bool geometry) {
           input.set_costs_matrix(profile_entry.name.GetString(),
                                  get_matrix<UserCost>(
                                    profile_entry.value["costs"]));
+        }
+        if (profile_entry.value.HasMember("energy")) {
+          input.set_energy_matrix(profile_entry.name.GetString(),
+                                 get_matrix<UserEnergy>(
+                                  profile_entry.value["energy"]));
         }
       }
     }

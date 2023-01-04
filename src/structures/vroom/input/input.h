@@ -51,6 +51,7 @@ private:
   bool _has_shipments;
   std::unordered_map<std::string, Matrix<UserDuration>> _durations_matrices;
   std::unordered_map<std::string, Matrix<UserCost>> _costs_matrices;
+  std::unordered_map<std::string, Matrix<UserCost>> _energy_matrices;
   Cost _cost_upper_bound;
   std::vector<Location> _locations;
   std::unordered_map<Location, Index> _locations_to_index;
@@ -111,6 +112,7 @@ public:
   void set_durations_matrix(const std::string& profile,
                             Matrix<UserDuration>&& m);
   void set_costs_matrix(const std::string& profile, Matrix<UserCost>&& m);
+  void set_energy_matrix(const std::string& profile, Matrix<UserCost>&& m);
 
   const Amount& zero_amount() const {
     return _zero;
