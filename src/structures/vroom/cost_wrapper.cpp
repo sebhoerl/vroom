@@ -18,7 +18,8 @@ CostWrapper::CostWrapper(double speed_factor, Cost per_hour)
     discrete_cost_factor(
       std::round(1 / speed_factor * DURATION_FACTOR * per_hour)),
     _per_hour(per_hour),
-    _cost_based_on_duration(true) {
+    _cost_based_on_duration(true),
+    discrete_energy_factor(ENERGY_FACTOR) {
   if (speed_factor <= 0 || speed_factor > MAX_SPEED_FACTOR) {
     throw InputException("Invalid speed factor: " +
                          std::to_string(speed_factor));
@@ -39,6 +40,11 @@ void CostWrapper::set_costs_matrix(const Matrix<UserCost>* matrix,
     discrete_cost_factor = DURATION_FACTOR * COST_FACTOR;
     _cost_based_on_duration = false;
   }
+}
+
+void CostWrapper::set_energy_matrix(const Matrix<UserEnergy>* matrix) {
+  energy_matrix_size = matrix->size();
+  energy_data = (*matrix)[0];
 }
 
 UserCost CostWrapper::user_cost_from_user_duration(UserDuration d) const {

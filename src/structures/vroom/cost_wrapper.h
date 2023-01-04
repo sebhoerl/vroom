@@ -28,6 +28,10 @@ private:
   Cost _per_hour;
   bool _cost_based_on_duration;
 
+  Energy discrete_energy_factor;
+  std::size_t energy_matrix_size;
+  const UserEnergy* energy_data;
+
 public:
   CostWrapper(double speed_factor, Cost per_hour);
 
@@ -35,6 +39,8 @@ public:
 
   void set_costs_matrix(const Matrix<UserCost>* matrix,
                         bool reset_cost_factor = false);
+
+  void set_energy_matrix(const Matrix<UserEnergy>* matrix);
 
   Duration get_discrete_duration_factor() const {
     return discrete_duration_factor;
@@ -52,6 +58,15 @@ public:
   Cost cost(Index i, Index j) const {
     return discrete_cost_factor *
            static_cast<Cost>(cost_data[i * cost_matrix_size + j]);
+  }
+
+  Energy energy(Index i, Index j) const {
+    if (energy_matrix_size == 0) {
+      return 0;
+    } else {
+      return -discrete_energy_factor *
+            static_cast<Energy>(energy_data[i * energy_matrix_size + j]);
+    }
   }
 
   UserCost user_cost_from_user_duration(UserDuration d) const;

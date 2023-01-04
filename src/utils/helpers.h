@@ -332,6 +332,8 @@ route_eval_for_vehicle(const Input& input,
   const auto& v = input.vehicles[vehicle_rank];
   Eval eval;
 
+  eval.energy = v.initial_energy;
+
   if (first_job != last_job) {
     eval.cost += v.fixed_cost();
 
@@ -425,7 +427,6 @@ inline Solution format_solution(const Input& input,
     Eval eval_sum;
     Duration setup = 0;
     Duration service = 0;
-    Energy used_energy = 0;
     Priority priority = 0;
     Amount sum_pickups(input.zero_amount());
     Amount sum_deliveries(input.zero_amount());
@@ -986,6 +987,11 @@ inline Route format_route(const Input& input,
     duration += travel_time;
     eval_sum += current_eval;
     step_start += travel_time;
+
+    // Currently, only consumption of energy, no recharging
+    assert(current_eval.energy <= 0);
+    remaining_energy += current_eval.energy;
+    user_used_energy += utils::scale_to_user_energy(-current_eval.energy);
   }
   assert(v.tw.contains(step_start));
   end_step.arrival = scale_to_user_duration(step_start);

@@ -600,6 +600,11 @@ void Input::set_vehicles_costs() {
     } else {
       vehicle.cost_wrapper.set_costs_matrix(&(d_m->second));
     }
+
+    auto e_m = _energy_matrices.find(vehicle.profile);
+    if (e_m != _energy_matrices.end()) {
+      vehicle.cost_wrapper.set_energy_matrix(&(e_m->second));
+    }
   }
 }
 
