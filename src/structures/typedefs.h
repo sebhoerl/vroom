@@ -181,6 +181,10 @@ inline UserCost scale_to_user_cost(Cost d) {
 inline Energy scale_from_user_energy(UserEnergy e) {
   return ENERGY_FACTOR * static_cast<Energy>(e);
 }
+
+inline UserEnergy scale_to_user_energy(Energy e) {
+  return static_cast<UserEnergy>(e / ENERGY_FACTOR);
+}
 } // namespace utils
 
 #ifdef LOG_LS_OPERATORS

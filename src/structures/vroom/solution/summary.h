@@ -29,6 +29,7 @@ struct Summary {
 
   UserDuration duration;
   UserDuration waiting_time;
+  UserEnergy used_energy;
   Distance distance;
   ComputingTimes computing_times;
 

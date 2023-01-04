@@ -33,6 +33,7 @@ Solution::Solution(unsigned code,
     summary.priority += route.priority;
     summary.duration += route.duration;
     summary.waiting_time += route.waiting_time;
+    summary.used_energy += route.used_energy;
     summary.violations += route.violations;
   }
 }

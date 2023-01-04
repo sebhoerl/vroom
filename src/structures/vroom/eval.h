@@ -17,6 +17,7 @@ namespace vroom {
 struct Eval {
   Cost cost;
   Duration duration;
+  Energy energy = 0;
 
   constexpr Eval() : cost(0), duration(0){};
 

@@ -168,6 +168,7 @@ rapidjson::Value to_json(const Summary& summary,
   json_summary.AddMember("duration", summary.duration, allocator);
   json_summary.AddMember("waiting_time", summary.waiting_time, allocator);
   json_summary.AddMember("priority", summary.priority, allocator);
+  json_summary.AddMember("used_energy", summary.used_energy, allocator);
 
   if (geometry) {
     json_summary.AddMember("distance", summary.distance, allocator);
@@ -191,6 +192,7 @@ rapidjson::Value to_json(const Route& route,
 
   json_route.AddMember("vehicle", route.vehicle, allocator);
   json_route.AddMember("cost", route.cost, allocator);
+  json_route.AddMember("used_energy", route.used_energy, allocator);
 
   if (!route.description.empty()) {
     json_route.AddMember("description", rapidjson::Value(), allocator);
@@ -323,6 +325,8 @@ rapidjson::Value to_json(const Step& s,
   json_step.AddMember("setup", s.setup, allocator);
   json_step.AddMember("service", s.service, allocator);
   json_step.AddMember("waiting_time", s.waiting_time, allocator);
+  json_step.AddMember("arrival_energy", s.arrival_energy, allocator);
+  json_step.AddMember("departure_energy", s.departure_energy, allocator);
 
   // Should be removed at some point as step.job is deprecated.
   if (s.step_type == STEP_TYPE::JOB) {

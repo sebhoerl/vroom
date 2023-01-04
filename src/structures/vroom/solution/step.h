@@ -34,6 +34,9 @@ struct Step {
   UserDuration waiting_time;
   Distance distance;
 
+  UserEnergy arrival_energy;
+  UserEnergy departure_energy;
+
   Violations violations;
 
   Step(STEP_TYPE type, Location location, const Amount& load);

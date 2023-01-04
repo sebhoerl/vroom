@@ -425,6 +425,7 @@ inline Solution format_solution(const Input& input,
     Eval eval_sum;
     Duration setup = 0;
     Duration service = 0;
+    Energy used_energy = 0;
     Priority priority = 0;
     Amount sum_pickups(input.zero_amount());
     Amount sum_deliveries(input.zero_amount());
@@ -541,6 +542,7 @@ inline Solution format_solution(const Input& input,
                         scale_to_user_duration(setup),
                         scale_to_user_duration(service),
                         0,
+                        0, // TODO /sh
                         priority,
                         sum_deliveries,
                         sum_pickups,
@@ -720,6 +722,8 @@ inline Route format_route(const Input& input,
   Duration duration = 0;
   UserDuration user_duration = 0;
   UserDuration user_waiting_time = 0;
+  UserEnergy user_used_energy = 0;
+  Energy remaining_energy = v.initial_energy;
   Duration setup = 0;
   Duration service = 0;
   Duration forward_wt = 0;
@@ -888,6 +892,14 @@ inline Route format_route(const Input& input,
     step_start += (current_setup + current_job.service);
 
     unassigned_ranks.erase(tw_r.route[r]);
+
+    // Currently, only consumption of energy, no recharging
+    assert(current_eval.energy <= 0);
+
+    remaining_energy += current_eval.energy;
+    user_used_energy += utils::scale_to_user_energy(-current_eval.energy);
+    current.arrival_energy = utils::scale_to_user_energy(remaining_energy);
+    current.departure_energy = utils::scale_to_user_energy(remaining_energy);
   }
 
   // Handle breaks after last job.
@@ -985,6 +997,9 @@ inline Route format_route(const Input& input,
   user_duration += user_travel_time;
   end_step.duration = user_duration;
 
+  end_step.arrival_energy = utils::scale_to_user_energy(remaining_energy);
+  end_step.departure_energy = utils::scale_to_user_energy(remaining_energy);
+
   assert(step_start == tw_r.earliest_end);
   assert(forward_wt == backward_wt);
 
@@ -1010,6 +1025,7 @@ inline Route format_route(const Input& input,
                scale_to_user_duration(setup),
                scale_to_user_duration(service),
                user_waiting_time,
+               user_used_energy,
                priority,
                sum_deliveries,
                sum_pickups,

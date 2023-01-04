@@ -28,7 +28,8 @@ Summary::Summary(unsigned routes,
     duration(0),
     waiting_time(0),
     distance(0),
-    violations(0, 0) {
+    violations(0, 0),
+    used_energy(0) {
 }
 
 } // namespace vroom

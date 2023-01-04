@@ -25,6 +25,7 @@ struct Route {
   UserDuration setup;
   UserDuration service;
   UserDuration waiting_time;
+  UserEnergy used_energy;
   Priority priority;
   Amount delivery;
   Amount pickup;
@@ -44,6 +45,7 @@ struct Route {
         UserDuration setup,
         UserDuration service,
         UserDuration waiting_time,
+        UserEnergy used_energy,
         Priority priority,
         const Amount& delivery,
         const Amount& pickup,
