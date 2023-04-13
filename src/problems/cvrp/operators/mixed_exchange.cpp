@@ -208,14 +208,24 @@ bool MixedExchange::is_valid() {
                                                       t_start,
                                                       t_start + 2,
                                                       s_rank,
+                                                      s_rank + 1) and
+      source.is_valid_addition_for_capacity_inclusion(_input,
+                                                      target_delivery,
+                                                      t_start,
+                                                      t_start + 2,
+                                                      s_rank,
                                                       s_rank + 1);
     if (check_t_reverse) {
       // Reverse target edge direction when inserting in source route.
       auto t_reverse_start = t_route.rbegin() + t_route.size() - 2 - t_rank;
       s_is_reverse_valid =
         s_v.ok_for_travel_time(s_travel_time - _reversed_s_gain.duration) and
-        source.is_valid_addition_for_capacity_inclusion(_input,
-                                                        target_delivery,
+        source.is_valid_addition_for_tour_inclusion(_input,
+                                                        t_reverse_start,
+                                                        t_reverse_start + 2,
+                                                        s_rank,
+                                                        s_rank + 1) and 
+        source.is_valid_addition_for_tour_inclusion(_input,
                                                         t_reverse_start,
                                                         t_reverse_start + 2,
                                                         s_rank,

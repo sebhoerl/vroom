@@ -222,7 +222,8 @@ bool IntraCrossExchange::is_valid() {
                                                     _moved_jobs.begin(),
                                                     _moved_jobs.end(),
                                                     _first_rank,
-                                                    _last_rank);
+                                                    _last_rank) and
+    source.is_valid_addition_for_tour_inclusion(_input, _moved_jobs.begin(), _moved_jobs.end(), _first_rank, _last_rank);
 
   std::swap(_moved_jobs[0], _moved_jobs[1]);
 
@@ -237,7 +238,8 @@ bool IntraCrossExchange::is_valid() {
                                                       _moved_jobs.begin(),
                                                       _moved_jobs.end(),
                                                       _first_rank,
-                                                      _last_rank);
+                                                      _last_rank) and
+      source.is_valid_addition_for_tour_inclusion(_input, _moved_jobs.begin(), _moved_jobs.end(), _first_rank, _last_rank);
   }
 
   std::swap(_moved_jobs[_moved_jobs.size() - 2],
@@ -253,7 +255,8 @@ bool IntraCrossExchange::is_valid() {
                                                       _moved_jobs.begin(),
                                                       _moved_jobs.end(),
                                                       _first_rank,
-                                                      _last_rank);
+                                                      _last_rank) and
+      source.is_valid_addition_for_tour_inclusion(_input, _moved_jobs.begin(), _moved_jobs.end(), _first_rank, _last_rank);
   }
 
   std::swap(_moved_jobs[0], _moved_jobs[1]);
@@ -269,7 +272,8 @@ bool IntraCrossExchange::is_valid() {
                                                       _moved_jobs.begin(),
                                                       _moved_jobs.end(),
                                                       _first_rank,
-                                                      _last_rank);
+                                                      _last_rank) and
+      source.is_valid_addition_for_tour_inclusion(_input, _moved_jobs.begin(), _moved_jobs.end(), _first_rank, _last_rank);
   }
 
   // Reset to initial situation before potential application and TW

@@ -106,6 +106,11 @@ bool IntraTwoOpt::is_valid() {
                                                             rev_t,
                                                             rev_s_next,
                                                             s_rank,
+                                                            t_rank + 1) and
+            source.is_valid_addition_for_tour_inclusion(_input,
+                                                            rev_t,
+                                                            rev_s_next,
+                                                            s_rank,
                                                             t_rank + 1);
   }
 

@@ -46,6 +46,7 @@ struct Vehicle {
   const Id id;
   std::optional<Location> start;
   std::optional<Location> end;
+  std::optional<Location> depot;
   const std::string profile;
   const Amount capacity;
   const Skills skills;
@@ -56,6 +57,7 @@ struct Vehicle {
   CostWrapper cost_wrapper;
   size_t max_tasks;
   const Duration max_travel_time;
+  const Duration max_travel_time_per_tour;
   const bool has_break_max_load;
   std::vector<VehicleStep> steps;
   std::unordered_map<Id, Index> break_id_to_rank;
@@ -75,6 +77,9 @@ struct Vehicle {
     const size_t max_tasks = std::numeric_limits<size_t>::max(),
     const std::optional<UserDuration>& max_travel_time =
       std::optional<UserDuration>(),
+    const std::optional<UserDuration>& max_travel_time_per_tour = 
+      std::optional<UserDuration>(),
+    const std::optional<Location>& depot = std::optional<Location>(),
     const std::vector<VehicleStep>& input_steps = std::vector<VehicleStep>());
 
   bool has_start() const;

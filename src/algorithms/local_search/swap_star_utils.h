@@ -448,6 +448,12 @@ SwapChoice compute_best_swap_star_choice(const Input& input,
                                                       s_insert.range.begin(),
                                                       s_insert.range.end(),
                                                       s_insert.first_rank,
+                                                      s_insert.last_rank) &&
+          source
+            .is_valid_addition_for_tour_inclusion(input,
+                                                      s_insert.range.begin(),
+                                                      s_insert.range.end(),
+                                                      s_insert.first_rank,
                                                       s_insert.last_rank);
 
         source_valid = source_valid &&
@@ -486,6 +492,12 @@ SwapChoice compute_best_swap_star_choice(const Input& input,
             target
               .is_valid_addition_for_capacity_inclusion(input,
                                                         target_delivery,
+                                                        t_insert.range.begin(),
+                                                        t_insert.range.end(),
+                                                        t_insert.first_rank,
+                                                        t_insert.last_rank) &&
+            target
+              .is_valid_addition_for_tour_inclusion(input,
                                                         t_insert.range.begin(),
                                                         t_insert.range.end(),
                                                         t_insert.first_rank,

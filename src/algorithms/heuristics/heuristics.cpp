@@ -193,7 +193,10 @@ T basic(const Input& input, INIT init, double lambda, SORT sort) {
             .is_valid_addition_for_capacity(input,
                                             input.jobs[job_rank].pickup,
                                             input.jobs[job_rank].delivery,
-                                            0);
+                                            0) &&
+          current_r.is_valid_addition_for_tour(input,
+                                               input.jobs[job_rank].location.index(),
+                                               0);
         if (is_pickup) {
           std::vector<Index> p_d({job_rank, static_cast<Index>(job_rank + 1)});
           is_valid =
@@ -298,7 +301,10 @@ T basic(const Input& input, INIT init, double lambda, SORT sort) {
                                                   input.jobs[job_rank].pickup,
                                                   input.jobs[job_rank].delivery,
                                                   r) and
-                current_r.is_valid_addition_for_tw(input, job_rank, r)) {
+                current_r.is_valid_addition_for_tw(input, job_rank, r) and
+                current_r.is_valid_addition_for_tour(input,
+                                                    input.jobs[job_rank].location.index(),
+                                                    r)) {
               best_cost = current_cost;
               best_job_rank = job_rank;
               best_r = r;
@@ -397,7 +403,15 @@ T basic(const Input& input, INIT init, double lambda, SORT sort) {
                                                               modified_with_pd
                                                                 .end(),
                                                               pickup_r,
-                                                              delivery_r);
+                                                              delivery_r) &&
+                  current_r
+                    .is_valid_addition_for_tour_inclusion(input,
+                                                modified_with_pd
+                                                  .begin(),
+                                                modified_with_pd
+                                                  .end(),
+                                                pickup_r,
+                                                delivery_r);
 
                 valid =
                   valid &&
@@ -623,7 +637,10 @@ T dynamic_vehicle_choice(const Input& input,
             .is_valid_addition_for_capacity(input,
                                             input.jobs[job_rank].pickup,
                                             input.jobs[job_rank].delivery,
-                                            0);
+                                            0)  &&
+          current_r.is_valid_addition_for_tour(input,
+                                               input.jobs[job_rank].location.index(),
+                                               0);
 
         if (is_pickup) {
           std::vector<Index> p_d({job_rank, static_cast<Index>(job_rank + 1)});
@@ -729,7 +746,10 @@ T dynamic_vehicle_choice(const Input& input,
                                                   input.jobs[job_rank].pickup,
                                                   input.jobs[job_rank].delivery,
                                                   r) and
-                current_r.is_valid_addition_for_tw(input, job_rank, r)) {
+                current_r.is_valid_addition_for_tw(input, job_rank, r)  &&
+                current_r.is_valid_addition_for_tour(input,
+                                               input.jobs[job_rank].location.index(),
+                                               r)) {
               best_cost = current_cost;
               best_job_rank = job_rank;
               best_r = r;
@@ -823,6 +843,14 @@ T dynamic_vehicle_choice(const Input& input,
                   current_r
                     .is_valid_addition_for_capacity_inclusion(input,
                                                               modified_delivery,
+                                                              modified_with_pd
+                                                                .begin(),
+                                                              modified_with_pd
+                                                                .end(),
+                                                              pickup_r,
+                                                              delivery_r) &&
+                  current_r
+                    .is_valid_addition_for_tour_inclusion(input,
                                                               modified_with_pd
                                                                 .begin(),
                                                               modified_with_pd

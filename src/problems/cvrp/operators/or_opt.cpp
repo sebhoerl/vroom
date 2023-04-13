@@ -165,7 +165,10 @@ bool OrOpt::is_valid() {
                target.is_valid_addition_for_capacity(_input,
                                                      edge_pickup,
                                                      edge_delivery,
-                                                     t_rank);
+                                                     t_rank) &&
+               target.is_valid_addition_for_tour(
+                  _input, _input.jobs[s_route[s_rank]].location.index(), t_rank);
+                  // IRTX TODO: s_rank or s_rank + 1 ?
 
   if (valid) {
     // Keep edge direction.
@@ -181,7 +184,8 @@ bool OrOpt::is_valid() {
                                                       s_start,
                                                       s_start + 2,
                                                       t_rank,
-                                                      t_rank);
+                                                      t_rank) and
+      target.is_valid_addition_for_tour_inclusion(_input, s_start, s_start + 2, t_rank, t_rank);
 
     // Reverse edge direction.
     auto s_reverse_start = s_route.rbegin() + s_route.size() - 2 - s_rank;
@@ -192,7 +196,8 @@ bool OrOpt::is_valid() {
                                                       s_reverse_start,
                                                       s_reverse_start + 2,
                                                       t_rank,
-                                                      t_rank);
+                                                      t_rank) and
+      target.is_valid_addition_for_tour_inclusion(_input, s_reverse_start, s_reverse_start + 2, t_rank, t_rank);
 
     valid = (is_normal_valid or is_reverse_valid);
   }

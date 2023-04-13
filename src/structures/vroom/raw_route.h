@@ -42,6 +42,10 @@ private:
   // rank).
   std::vector<Amount> _current_loads;
 
+  // Tour travel time up to rank and after rank i
+  std::vector<Duration> _preceding_tour_travel_time;
+  std::vector<Duration> _following_tour_travel_time;
+
   // _fwd_peaks[s] stores the peak load (component-wise) up to *step*
   // s. _bwd_peaks[s] stores the peak load (component-wise) after
   // *step* s.
@@ -123,6 +127,19 @@ public:
                                                 const InputIterator last_job,
                                                 const Index first_rank,
                                                 const Index last_rank) const;
+
+  // Check validity for addition of a given duration in current tour
+  // at rank.
+  bool is_valid_addition_for_tour(const Input&,
+                                      const Index location,
+                                      const Index rank) const;
+
+  template <class InputIterator>
+  bool is_valid_addition_for_tour_inclusion(const Input& input,
+                                                const InputIterator first_job,
+                                                const InputIterator last_job,
+                                                const Index first_rank,
+                                                const Index last_rank) const;                          
 
   const Amount& job_deliveries_sum() const;
 

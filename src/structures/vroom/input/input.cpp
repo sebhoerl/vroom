@@ -508,7 +508,8 @@ void Input::set_extra_compatibility() {
           empty_route.is_valid_addition_for_capacity(*this,
                                                      jobs[j].pickup,
                                                      jobs[j].delivery,
-                                                     0);
+                                                     0) &&
+          empty_route.is_valid_addition_for_tour(*this, jobs[j].location.index(), 0);
 
         bool is_shipment_pickup = (jobs[j].type == JOB_TYPE::PICKUP);
 

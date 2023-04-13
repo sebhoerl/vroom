@@ -177,6 +177,20 @@ bool ReverseTwoOpt::is_valid() {
                                                            s_route.size() - 1 -
                                                            s_rank,
                                                          0,
+                                                         t_rank + 1) &&
+         source.is_valid_addition_for_tour_inclusion(_input,
+                                                         t_route.rbegin() +
+                                                           t_route.size() - 1 -
+                                                           t_rank,
+                                                         t_route.rend(),
+                                                         s_rank + 1,
+                                                         s_route.size()) &&
+         target.is_valid_addition_for_tour_inclusion(_input,
+                                                         s_route.rbegin(),
+                                                         s_route.rbegin() +
+                                                           s_route.size() - 1 -
+                                                           s_rank,
+                                                         0,
                                                          t_rank + 1);
 }
 

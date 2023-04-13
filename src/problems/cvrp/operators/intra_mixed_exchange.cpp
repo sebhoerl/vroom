@@ -207,6 +207,10 @@ bool IntraMixedExchange::is_valid() {
                                                     _moved_jobs.begin(),
                                                     _moved_jobs.end(),
                                                     _first_rank,
+                                                    _last_rank) and
+    source.is_valid_addition_for_tour_inclusion(_input, _moved_jobs.begin(),
+                                                    _moved_jobs.end(),
+                                                    _first_rank,
                                                     _last_rank);
 
   if (check_t_reverse) {
@@ -218,6 +222,11 @@ bool IntraMixedExchange::is_valid() {
       s_is_reverse_valid =
         source.is_valid_addition_for_capacity_inclusion(_input,
                                                         _delivery,
+                                                        _moved_jobs.begin(),
+                                                        _moved_jobs.end(),
+                                                        _first_rank,
+                                                        _last_rank) and
+        source.is_valid_addition_for_tour_inclusion(_input,
                                                         _moved_jobs.begin(),
                                                         _moved_jobs.end(),
                                                         _first_rank,

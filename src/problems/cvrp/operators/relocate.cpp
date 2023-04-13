@@ -68,7 +68,8 @@ bool Relocate::is_valid() {
                                            _input.jobs[s_route[s_rank]].pickup,
                                            _input.jobs[s_route[s_rank]]
                                              .delivery,
-                                           t_rank);
+                                           t_rank) &&
+        target.is_valid_addition_for_tour(_input, _input.jobs[s_route[s_rank]].location.index(), t_rank);
 }
 
 void Relocate::apply() {

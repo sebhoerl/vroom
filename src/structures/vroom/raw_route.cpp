@@ -9,6 +9,12 @@ All rights reserved (see LICENSE).
 
 #include "structures/vroom/raw_route.h"
 
+// #define TOUR_DEBUG
+
+#ifdef TOUR_DEBUG
+  #include <iostream>
+#endif
+
 namespace vroom {
 
 RawRoute::RawRoute(const Input& input, Index i, unsigned amount_size)
@@ -50,6 +56,9 @@ void RawRoute::update_amounts(const Input& input) {
   _fwd_peaks.resize(step_size);
   _bwd_peaks.resize(step_size);
 
+  _preceding_tour_travel_time.resize(route.size() + 1);
+  _following_tour_travel_time.resize(route.size() + 1);
+
   if (route.empty()) {
     // So that check in is_valid_addition_for_capacity is consistent
     // with empty routes.
@@ -58,6 +67,8 @@ void RawRoute::update_amounts(const Input& input) {
     // So that check against break max_load and margins computations
     // are consistent with empty routes.
     std::fill(_current_loads.begin(), _current_loads.end(), _zero);
+    std::fill(_preceding_tour_travel_time.begin(), _preceding_tour_travel_time.end(), 0);
+    std::fill(_following_tour_travel_time.begin(), _following_tour_travel_time.end(), 0);
     return;
   }
 
@@ -66,6 +77,45 @@ void RawRoute::update_amounts(const Input& input) {
   Amount current_pd_load(_zero);
   unsigned current_nb_pickups = 0;
   unsigned current_nb_deliveries = 0;
+
+  Vehicle vehicle = input.vehicles[vehicle_rank];
+
+  if (vehicle.depot.has_value()) {
+    Index depot_index = vehicle.depot.value().index();
+
+    if (has_start) {
+      Index from_index = vehicle.start.value().index();
+      Index to_index = input.jobs[route[0]].location.index();
+      _preceding_tour_travel_time[1] = vehicle.duration(from_index, to_index);
+    }
+
+    for (std::size_t i = 2; i <= route.size(); i++) {
+      if (depot_index != input.jobs[route[i - 1]].location.index()) {
+        Index from_index = input.jobs[route[i - 2]].location.index();
+        Index to_index = input.jobs[route[i - 1]].location.index();
+
+        _preceding_tour_travel_time[i] = _preceding_tour_travel_time[i - 1] + vehicle.duration(from_index, to_index);
+      } // else: Reset preceding travel time to zero if we insert after a depot stop
+    }
+
+    if (has_end) {
+      Index from_index = input.jobs[route[route.size() - 1]].location.index();
+      Index to_index = vehicle.end.value().index();
+
+      _following_tour_travel_time[route.size() - 1] = vehicle.duration(from_index, to_index);
+    }
+
+    for (std::size_t i = route.size() - 2; i >= 0; i--) {
+      if (depot_index != input.jobs[route[i]].location.index()) {
+        Index from_index = input.jobs[route[i]].location.index();
+        Index to_index = input.jobs[route[i + 1]].location.index();
+
+        _following_tour_travel_time[i] = _following_tour_travel_time[i + 1] + vehicle.duration(from_index, to_index);
+      } // else: Reset following travel time to zero if we insert before a depot stop
+    
+      if (i == 0) break; // Avoid overflow
+    }
+  }
 
   for (std::size_t i = 0; i < route.size(); ++i) {
     const auto& job = input.jobs[route[i]];
@@ -158,6 +208,325 @@ bool RawRoute::has_pending_delivery_after_rank(const Index rank) const {
 bool RawRoute::has_delivery_after_rank(const Index rank) const {
   assert(rank < _nb_deliveries.size());
   return _nb_deliveries[rank] < _nb_deliveries.back();
+}
+
+bool RawRoute::is_valid_addition_for_tour(const Input& input,
+                                      const Index location,
+                                      const Index rank) const {
+  #ifdef TOUR_DEBUG
+    std::cout << "RawRoute::is_valid_addition_for_tour\n";
+  #endif
+
+  Vehicle vehicle = input.vehicles[vehicle_rank];
+
+  if (!vehicle.depot.has_value()) {
+    #ifdef TOUR_DEBUG
+      std::cout << "  Result: No depot\n";
+    #endif
+    return true;
+  }
+
+  #ifdef TOUR_DEBUG
+    std::cout << "  Current route: ";
+    std::cout << "(" << vehicle.start.value().index() << ") ";
+    for (size_t i = 0; i < route.size(); i++) {
+      if (i == rank) {
+        std::cout << "* ";
+      }
+
+      std::cout << input.jobs[route[i]].location.index() << " ";
+    }
+
+    if (rank == route.size()) {
+      std::cout << "* ";
+    }
+
+    std::cout << "(" << vehicle.end.value().index() << ") ; Size " << route.size() << " \n";
+
+    std::cout << "  New location: " << location << "\n";
+  #endif
+
+  assert(rank <= route.size());
+
+  Index preceding_index = location;
+  if (rank > 0) {
+    preceding_index = input.jobs[route[rank - 1]].location.index();
+
+    #ifdef TOUR_DEBUG
+      std::cout << "  Preceding index: " << preceding_index << "\n";
+    #endif
+  } else if (has_start) {
+    preceding_index = vehicle.start.value().index();
+
+    #ifdef TOUR_DEBUG
+      std::cout << "  Preceding index: " << preceding_index << " (start)\n";
+    #endif
+  }
+
+  Index following_index = location;
+  if (rank < route.size()) {
+    following_index = input.jobs[route[rank]].location.index();
+
+    #ifdef TOUR_DEBUG
+      std::cout << "  Following index: " << following_index << "\n";
+    #endif
+  } else if (has_end) {
+    following_index = vehicle.end.value().index();
+
+    #ifdef TOUR_DEBUG
+      std::cout << "  Following index: " << following_index << " (end)\n";
+    #endif
+  }
+
+  Duration additional_to = vehicle.duration(preceding_index, location);
+  Duration additional_from = vehicle.duration(location, following_index);
+  Duration additional_total = additional_to + additional_from;
+
+  if (route.size() == 0) {
+    #ifdef TOUR_DEBUG
+      std::cout << "  Trace: " << additional_to << " (to) " << additional_from << " (from)\n";
+    #endif
+
+    if (additional_total > vehicle.max_travel_time_per_tour) {
+      #ifdef TOUR_DEBUG
+        std::cout << "  Result: Exceeds!\n";
+      #endif
+
+      return false;
+    } else {
+      #ifdef TOUR_DEBUG
+        std::cout << "  Result: OK!\n";
+      #endif
+
+      return true;
+    }
+  } else {
+    Duration preceding = _preceding_tour_travel_time[rank];
+    Duration following = _following_tour_travel_time[rank];
+    
+    #ifdef TOUR_DEBUG
+      std::cout << "  Trace: ";
+      std::cout << preceding << " (pre) ";
+      std::cout << additional_to << " (to) ";
+    #endif
+
+    Duration trace = preceding + additional_to;
+
+    if (trace > vehicle.max_travel_time_per_tour) {
+      #ifdef TOUR_DEBUG
+        std::cout << "\n  Result: Exceeds!\n";
+      #endif
+
+      return false;
+    }
+
+    if (vehicle.depot.value().index() == location) {
+      trace = 0;
+
+      #ifdef TOUR_DEBUG
+        std::cout << "/// ";
+      #endif
+    }
+
+    #ifdef TOUR_DEBUG
+      std::cout << additional_from << " (from) ";
+      std::cout << following << " (follow) ";
+    #endif
+
+    trace += additional_from + following;
+
+    if (trace > vehicle.max_travel_time_per_tour) {
+      #ifdef TOUR_DEBUG
+        std::cout << "\n  Result: Exceeds!\n";
+      #endif
+
+      return false;
+    }
+
+    return true;
+  }
+}
+
+template <class InputIterator>
+bool RawRoute::is_valid_addition_for_tour_inclusion(
+  const Input& input,
+  const InputIterator first_job,
+  const InputIterator last_job,
+  const Index first_rank,
+  const Index last_rank) const {
+  #ifdef TOUR_DEBUG
+    std::cout << "RawRoute::is_valid_addition_for_tour_inclusion\n";
+  #endif
+
+  Vehicle vehicle = input.vehicles[vehicle_rank];
+
+  if (!vehicle.depot.has_value()) {
+    #ifdef TOUR_DEBUG
+      std::cout << "  Result: No depot\n";
+    #endif
+
+    return true;
+  }
+
+  Index depot_index = vehicle.depot.value().index();
+  const Duration& max_travel_time_per_tour = vehicle.max_travel_time_per_tour;
+
+  assert(first_rank <= last_rank);
+  assert(last_rank <= route.size() + 1);
+
+  #ifdef TOUR_DEBUG
+    std::cout << "  Current route: ";
+    std::cout << "(" << vehicle.start.value().index() << ") ";
+    for (size_t i = 0; i < route.size(); i++) {
+      if (i == first_rank) {
+        std::cout << "* ";
+      }
+
+      if (i == last_rank) {
+        std::cout << "* ";
+      }
+
+      std::cout << input.jobs[route[i]].location.index() << " ";
+    }
+
+    if (route.size() == first_rank) {
+      std::cout << "* ";
+    }
+
+    if (route.size() == last_rank) {
+      std::cout << "* ";
+    }
+
+    std::cout << "(" << vehicle.end.value().index() << ") ; Size " << route.size() << " \n";
+
+    std::cout << "  Insertion ranks: " << first_rank << " -> " << last_rank << "\n";
+    std::cout << "  Insertion locations: ";
+    for (auto job_iter = first_job; job_iter != last_job; ++job_iter) {
+      std::cout << input.jobs[*job_iter].location.index() << " ";
+    }
+    std::cout << "\n";
+  #endif
+
+  Index preceding_index = input.jobs[*first_job].location.index();
+  if (first_rank > 0) {
+    preceding_index = input.jobs[route[first_rank - 1]].location.index();
+
+    #ifdef TOUR_DEBUG
+      std::cout << "  Preceding index: " << preceding_index << "\n";
+    #endif
+  } else if (has_start) {
+    preceding_index = vehicle.start.value().index();
+
+    #ifdef TOUR_DEBUG
+      std::cout << "  Preceding index: " << preceding_index << " (start)\n";
+    #endif
+  }
+
+  Index following_index = input.jobs[*(last_job - 1)].location.index();
+  if (last_rank < route.size()) {
+    following_index = input.jobs[route[last_rank]].location.index();
+
+    #ifdef TOUR_DEBUG
+      std::cout << "  Following index: " << following_index << "\n";
+    #endif
+  } else if (has_end) {
+    following_index = vehicle.end.value().index();
+
+    #ifdef TOUR_DEBUG
+      std::cout << "  Following index: " << following_index << " (end)\n";
+    #endif
+  }
+
+  Duration trace = 0;
+  Duration addition = 0;
+
+  #ifdef TOUR_DEBUG
+    std::cout << "  Trace: ";
+  #endif
+
+  if (route.size() > 0) {
+    addition = _preceding_tour_travel_time[first_rank];
+    trace += addition;
+    
+    #ifdef TOUR_DEBUG
+      std::cout << addition << " (pre) ";
+    #endif
+  }
+
+  addition = vehicle.duration(preceding_index, input.jobs[*first_job].location.index());
+  trace += addition;
+
+  #ifdef TOUR_DEBUG
+    std::cout << addition << " (to) ";
+  #endif
+
+  if (trace > max_travel_time_per_tour) {
+    #ifdef TOUR_DEBUG
+      std::cout << "\n  Result: Exceeds!\n";
+    #endif
+
+    return false;
+  }
+
+  if (first_job != last_job) {
+    for (auto job_iter = first_job + 1; job_iter != last_job; ++job_iter) {
+      addition = vehicle.duration(
+        input.jobs[*(job_iter - 1)].location.index(),
+        input.jobs[*(job_iter)].location.index()
+      );
+      trace += addition;
+
+      #ifdef TOUR_DEBUG
+        std::cout << addition << " (move) ";
+      #endif
+
+      if (trace > max_travel_time_per_tour) {
+        #ifdef TOUR_DEBUG
+          std::cout << "\n  Result: Exceeds!\n";
+        #endif
+
+        return false;
+      }
+
+      if (depot_index == input.jobs[*(job_iter)].location.index()) {
+        trace = 0; // Reset because we have returned to depot!
+
+        #ifdef TOUR_DEBUG
+          std::cout << "/// ";
+        #endif
+      }
+    }
+  }
+
+  addition = vehicle.duration(input.jobs[*(last_job - 1)].location.index(), following_index);
+  trace += addition;
+
+  #ifdef TOUR_DEBUG
+    std::cout << addition << " (from) ";
+  #endif
+
+  if (route.size() > 0) {
+    addition = _following_tour_travel_time[last_rank];
+    trace += addition;
+
+    #ifdef TOUR_DEBUG
+      std::cout << addition << " (follow) ";
+    #endif
+  }
+
+  if (trace > max_travel_time_per_tour) {
+    #ifdef TOUR_DEBUG
+      std::cout << "\n  Result: Exceeds!\n";
+    #endif
+
+    return false;
+  }
+
+  #ifdef TOUR_DEBUG
+    std::cout << "\n  Result: OK!\n";
+  #endif
+
+  return true;
 }
 
 bool RawRoute::has_pickup_up_to_rank(const Index rank) const {
@@ -328,6 +697,26 @@ template bool RawRoute::is_valid_addition_for_capacity_inclusion(
   const std::vector<Index>::reverse_iterator last_job,
   const Index first_rank,
   const Index last_rank) const;
+
+template bool RawRoute::is_valid_addition_for_tour_inclusion(
+  const Input& input,
+  const std::vector<Index>::iterator first_job,
+  const std::vector<Index>::iterator last_job,
+  const Index first_rank,
+  const Index last_rank) const;
+template bool RawRoute::is_valid_addition_for_tour_inclusion(
+  const Input& input,
+  const std::vector<Index>::const_iterator first_job,
+  const std::vector<Index>::const_iterator last_job,
+  const Index first_rank,
+  const Index last_rank) const;
+template bool RawRoute::is_valid_addition_for_tour_inclusion(
+  const Input& input,
+  const std::vector<Index>::reverse_iterator first_job,
+  const std::vector<Index>::reverse_iterator last_job,
+  const Index first_rank,
+  const Index last_rank) const;
+
 template void RawRoute::replace(const Input& input,
                                 std::vector<Index>::iterator first_job,
                                 std::vector<Index>::iterator last_job,

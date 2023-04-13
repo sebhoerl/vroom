@@ -138,6 +138,18 @@ bool TwoOpt::is_valid() {
                                                            s_rank + 1,
                                                          s_route.end(),
                                                          t_rank + 1,
+                                                         t_route.size()) &&
+         source.is_valid_addition_for_tour_inclusion(_input,
+                                                         t_route.begin() +
+                                                           t_rank + 1,
+                                                         t_route.end(),
+                                                         s_rank + 1,
+                                                         s_route.size()) &&
+         target.is_valid_addition_for_tour_inclusion(_input,
+                                                         s_route.begin() +
+                                                           s_rank + 1,
+                                                         s_route.end(),
+                                                         t_rank + 1,
                                                          t_route.size());
 }
 

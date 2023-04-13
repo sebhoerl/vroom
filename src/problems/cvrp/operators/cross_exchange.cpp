@@ -248,7 +248,8 @@ bool CrossExchange::is_valid() {
                                                       t_start,
                                                       t_start + 2,
                                                       s_rank,
-                                                      s_rank + 2);
+                                                      s_rank + 2) and
+      source.is_valid_addition_for_tour_inclusion(_input, t_start, t_start + 2, s_rank, s_rank + 2);
 
     if (check_t_reverse) {
       // Reverse target edge direction when inserting in source route.
@@ -260,7 +261,8 @@ bool CrossExchange::is_valid() {
                                                         t_reverse_start,
                                                         t_reverse_start + 2,
                                                         s_rank,
-                                                        s_rank + 2);
+                                                        s_rank + 2) and
+        source.is_valid_addition_for_tour_inclusion(_input, t_reverse_start, t_reverse_start + 2, s_rank, s_rank + 2);
     }
 
     valid = s_is_normal_valid or s_is_reverse_valid;
@@ -289,7 +291,8 @@ bool CrossExchange::is_valid() {
                                                       s_start,
                                                       s_start + 2,
                                                       t_rank,
-                                                      t_rank + 2);
+                                                      t_rank + 2) and
+      target.is_valid_addition_for_tour_inclusion(_input, s_start, s_start + 2, t_rank, t_rank + 2);
 
     if (check_s_reverse) {
       // Reverse source edge direction when inserting in target route.
@@ -301,7 +304,8 @@ bool CrossExchange::is_valid() {
                                                         s_reverse_start,
                                                         s_reverse_start + 2,
                                                         t_rank,
-                                                        t_rank + 2);
+                                                        t_rank + 2) and
+        target.is_valid_addition_for_tour_inclusion(_input, s_reverse_start, s_reverse_start + 2, t_rank, t_rank + 2);
     }
 
     valid = t_is_normal_valid or t_is_reverse_valid;

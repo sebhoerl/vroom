@@ -113,6 +113,11 @@ bool UnassignedExchange::is_valid() {
                                                           _moved_jobs.begin(),
                                                           _moved_jobs.end(),
                                                           _first_rank,
+                                                          _last_rank) &&
+          source.is_valid_addition_for_tour_inclusion(_input,
+                                                          _moved_jobs.begin(),
+                                                          _moved_jobs.end(),
+                                                          _first_rank,
                                                           _last_rank);
 
   if (valid) {

@@ -185,6 +185,11 @@ bool IntraOrOpt::is_valid() {
                                                     _moved_jobs.begin(),
                                                     _moved_jobs.end(),
                                                     _first_rank,
+                                                    _last_rank) and 
+    source.is_valid_addition_for_tour_inclusion(_input,
+                                                    _moved_jobs.begin(),
+                                                    _moved_jobs.end(),
+                                                    _first_rank,
                                                     _last_rank);
 
   if (check_reverse) {
@@ -199,7 +204,12 @@ bool IntraOrOpt::is_valid() {
                                                         _moved_jobs.begin(),
                                                         _moved_jobs.end(),
                                                         _first_rank,
-                                                        _last_rank);
+                                                        _last_rank) and 
+    source.is_valid_addition_for_tour_inclusion(_input,
+                                                    _moved_jobs.begin(),
+                                                    _moved_jobs.end(),
+                                                    _first_rank,
+                                                    _last_rank);
 
       // Reset to initial situation before potential application or TW
       // checks.

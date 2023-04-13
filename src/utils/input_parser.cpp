@@ -139,6 +139,18 @@ get_max_travel_time(const rapidjson::Value& object) {
   return max_travel_time;
 }
 
+inline std::optional<UserDuration>
+get_max_travel_time_per_tour(const rapidjson::Value& object) {
+  std::optional<UserDuration> max_travel_time_per_tour;
+  if (object.HasMember("max_travel_time_per_tour")) {
+    if (!object["max_travel_time_per_tour"].IsUint()) {
+      throw InputException("Invalid max_travel_time_per_tour value.");
+    }
+    max_travel_time_per_tour = object["max_travel_time_per_tour"].GetUint();
+  }
+  return max_travel_time_per_tour;
+}
+
 inline void check_id(const rapidjson::Value& v, const std::string& type) {
   if (!v.IsObject()) {
     throw InputException("Invalid " + type + ".");
@@ -405,6 +417,12 @@ inline Vehicle get_vehicle(const rapidjson::Value& json_vehicle,
     }
   }
 
+  std::optional<Location> depot;
+  if (json_vehicle.HasMember("depot_index")) {
+    // Custom provided matrices and index.
+    depot = json_vehicle["depot_index"].GetUint();
+  }
+
   std::string profile = get_string(json_vehicle, "profile");
   if (profile.empty()) {
     profile = DEFAULT_PROFILE;
@@ -423,6 +441,8 @@ inline Vehicle get_vehicle(const rapidjson::Value& json_vehicle,
                  get_double(json_vehicle, "speed_factor"),
                  get_max_tasks(json_vehicle),
                  get_max_travel_time(json_vehicle),
+                 get_max_travel_time_per_tour(json_vehicle),
+                 depot,
                  get_vehicle_steps(json_vehicle));
 }
 

@@ -42,6 +42,7 @@ compute_best_insertion_single(const Input& input,
                                                current_job.pickup,
                                                current_job.delivery,
                                                rank) &&
+          route.is_valid_addition_for_tour(input, current_job.location.index(), rank) &&
           route.is_valid_addition_for_tw(input, j, rank)) {
         result.eval = current_eval;
         result.delivery = current_job.delivery;
@@ -73,7 +74,8 @@ bool valid_for_capacity(const Input& input,
                                                     start,
                                                     end,
                                                     pickup_r,
-                                                    delivery_r);
+                                                    delivery_r) &&
+        r.is_valid_addition_for_tour_inclusion(input, start, end, pickup_r, delivery_r);
 }
 
 template <class Route>
