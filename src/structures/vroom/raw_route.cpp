@@ -368,6 +368,14 @@ bool RawRoute::is_valid_addition_for_tour_inclusion(
     return true;
   }
 
+  if (first_job == last_job) {
+    #ifdef TOUR_DEBUG
+      std::cout << "  Result: Invalid iterator\n";
+    #endif
+
+    return false; // Invalid
+  }
+
   Index depot_index = vehicle.depot.value().index();
   const Duration& max_travel_time_per_tour = vehicle.max_travel_time_per_tour;
 
