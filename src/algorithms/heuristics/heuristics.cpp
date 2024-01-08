@@ -205,7 +205,12 @@ T basic(const Input& input, INIT init, double lambda, SORT sort) {
                                                            p_d.begin(),
                                                            p_d.end(),
                                                            0,
-                                                           0);
+                                                           0) &&
+                        current_r.is_valid_addition_for_tour_inclusion(input,
+                                                            p_d.begin(),
+                                                            p_d.end(),
+                                                            0,
+                                                            0);
         } else {
           assert(input.jobs[job_rank].type == JOB_TYPE::SINGLE);
           is_valid =
