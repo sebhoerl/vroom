@@ -412,6 +412,13 @@ inline Vehicle get_vehicle(const rapidjson::Value& json_vehicle,
     profile = DEFAULT_PROFILE;
   }
 
+  if (json_vehicle.HasMember("max_tour_travel_time") || json_vehicle.HasMember("has_tour_distance")) {
+    if (!json_vehicle.HasMember("time_window")) {
+      throw InputException("If max_tour_travel_time or max_tour_distance is used, a time window must be set for vehicle " +
+                      std::to_string(v_id) + ".");
+    }
+  }
+
   return Vehicle(v_id,
                  start,
                  end,
@@ -426,6 +433,8 @@ inline Vehicle get_vehicle(const rapidjson::Value& json_vehicle,
                  get_value_for<size_t>(json_vehicle, "max_tasks"),
                  get_value_for<UserDuration>(json_vehicle, "max_travel_time"),
                  get_value_for<UserDistance>(json_vehicle, "max_distance"),
+                 get_value_for<UserDuration>(json_vehicle, "max_tour_travel_time"),
+                 get_value_for<UserDistance>(json_vehicle, "max_tour_distance"),
                  get_vehicle_steps(json_vehicle));
 }
 

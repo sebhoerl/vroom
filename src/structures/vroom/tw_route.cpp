@@ -710,6 +710,84 @@ OrderChoice TWRoute::order_choice(const Input& input,
   return oc;
 }
 
+template<std::forward_iterator Iter>
+bool TWRoute::check_tour_constraints(const Input& input,
+                                        const Iter first_job,
+                                        const Iter last_job,
+                                        const Index first_rank,
+                                        const Index last_rank) const {
+  if (!has_start) {
+    return true; // only applicable if vehicle has a start (depot) location
+  }
+
+  const Vehicle& vehicle = input.vehicles[vehicle_rank];
+  Index depot_location = vehicle.start.value().index();
+
+  Duration max_duration = vehicle.max_tour_travel_time;
+  Distance max_distance = vehicle.max_tour_distance;
+
+  Index current_location = depot_location;
+  Eval current_eval = 0;
+
+  for (Index i = 0; i < first_rank; i++) {
+    Index next_location = input.jobs[route[i]].location.index();
+    current_eval += vehicle.eval(current_location, next_location);
+
+    if (current_eval.duration > max_duration || current_eval.distance > max_distance) {
+      return false;
+    }
+
+    current_location = next_location;
+
+    if (current_location == depot_location) {
+      current_eval = 0;
+    }
+  }
+
+  Iter iterator = first_job;
+  while (iterator != last_job) {
+    Index next_location = input.jobs[*iterator].location.index();
+    current_eval += vehicle.eval(current_location, next_location);
+
+    if (current_eval.duration > max_duration || current_eval.distance > max_distance) {
+      return false;
+    }
+
+    current_location = next_location;
+    iterator++;
+
+    if (current_location == depot_location) {
+      current_eval = 0;
+    }
+  }
+
+  for (Index i = last_rank; i < route.size(); i++) {
+    Index next_location = input.jobs[route[i]].location.index();
+    current_eval += vehicle.eval(current_location, next_location);
+
+    if (current_eval.duration > max_duration || current_eval.distance > max_distance) {
+      return false;
+    }
+
+    current_location = next_location;
+
+    if (current_location == depot_location) {
+      current_eval = 0;
+    }
+  }
+
+  if (has_end) {
+    Index next_location = vehicle.end.value().index();
+    current_eval += vehicle.eval(current_location, next_location);
+
+    if (current_eval.duration > max_duration || current_eval.distance > max_distance) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 template <std::forward_iterator Iter>
 bool TWRoute::is_valid_addition_for_tw(const Input& input,
                                        const Amount& delivery,
@@ -999,6 +1077,10 @@ bool TWRoute::is_valid_addition_for_tw(const Input& input,
         return false;
       }
     }
+  }
+
+  if (!check_tour_constraints(input, first_job, last_job, first_rank, last_rank)) {
+    return false;
   }
 
   return current.earliest + next.travel <= next.latest;

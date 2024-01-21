@@ -175,6 +175,13 @@ public:
                                 const Index last_rank,
                                 bool check_max_load = true) const;
 
+  template<std::forward_iterator Iter>
+  bool check_tour_constraints(const Input& input,
+                                        const Iter first_job,
+                                        const Iter last_job,
+                                        const Index first_rank,
+                                        const Index last_rank) const;
+
   void add(const Input& input, const Index job_rank, const Index rank) {
     assert(rank <= route.size());
     assert(input.jobs[job_rank].type == JOB_TYPE::SINGLE);
