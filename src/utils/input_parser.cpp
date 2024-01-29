@@ -412,7 +412,7 @@ inline Vehicle get_vehicle(const rapidjson::Value& json_vehicle,
     profile = DEFAULT_PROFILE;
   }
 
-  if (json_vehicle.HasMember("max_tour_travel_time") || json_vehicle.HasMember("has_tour_distance")) {
+  if (json_vehicle.HasMember("max_tour_travel_time") || json_vehicle.HasMember("max_tour_distance")) {
     if (!json_vehicle.HasMember("time_window")) {
       throw InputException("If max_tour_travel_time or max_tour_distance is used, a time window must be set for vehicle " +
                       std::to_string(v_id) + ".");

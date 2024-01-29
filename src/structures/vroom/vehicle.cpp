@@ -52,7 +52,7 @@ Vehicle::Vehicle(Id id,
     max_tour_travel_time(max_tour_travel_time.has_value()
                       ? utils::scale_from_user_duration(max_tour_travel_time.value())
                       : DEFAULT_MAX_TRAVEL_TIME),
-    max_tour_distance(max_distance.has_value() ? max_tour_distance.value()
+    max_tour_distance(max_tour_distance.has_value() ? max_tour_distance.value()
                                           : DEFAULT_MAX_DISTANCE),
     has_break_max_load(std::ranges::any_of(breaks, [](const auto& b) {
       return b.max_load.has_value();
